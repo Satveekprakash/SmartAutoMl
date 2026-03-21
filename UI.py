@@ -31,9 +31,9 @@ st.caption("Train ML/DL models automatically with zero coding 🚀")
 
 # ------------------ SIDEBAR ------------------
 st.sidebar.header("⚙️ Configuration")
-
 file = st.sidebar.file_uploader("📂 Upload CSV", type=["csv"])
-target = st.sidebar.text_input("🎯 Target Column (or NONE)")
+target = st.sidebar.text_input("🎯 Target Column (write or it auto detect)")
+
 model_type = st.sidebar.selectbox(
     "🧠 Select Model Type",
     ["MachineLearning", "DeepLearning"]
@@ -55,9 +55,27 @@ if "data" in st.session_state:
     st.dataframe(data.head(), use_container_width=True)
 
     st.info(f"Shape: {data.shape[0]} rows × {data.shape[1]} columns")
+
     # chat
     from chat import show_ai_assistant
-    show_ai_assistant(data)
+
+    if "data" in st.session_state:
+        show_ai_assistant(st.session_state["data"])
+    # target predtiction or auto
+    from llm_utils import detect_target
+
+    if target.strip() == "":
+        target = detect_target(data)
+        st.success("Target is auto detect")
+        st.success(target)
+
+         # 🔥 important check
+        if target not in data.columns:
+            target = "NONE"
+
+    else:
+        if target not in data.columns:
+             target = "NONE"
     # ------------------ RUN MODEL ------------------
     if run_btn:
 
@@ -175,5 +193,3 @@ if st.session_state.get("trained"):
             pred = encoder.inverse_transform(pred)
 
         st.success(f"Prediction: {pred[0]}")
-from chat import show_ai_assistant
-show_ai_assistant(data)

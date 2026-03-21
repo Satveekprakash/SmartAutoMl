@@ -1,110 +1,50 @@
+
 import streamlit as st
-from pandasai import SmartDataframe
-from pandasai.llm import OpenAI
 import os
-
-
+from groq import Groq
+from dotenv import load_dotenv
+load_dotenv()
 def show_ai_assistant(data):
 
     st.divider()
-    st.subheader("🤖 AI Data Assistant (Groq)")
+    st.subheader("🤖 AI Data Assistant")
 
-    # ------------------ COLUMN INFO ------------------
-    st.markdown("### 📋 Dataset Columns")
+    # -------- GROQ --------
+    client = Groq(api_key=os.getenv("API_KEY"))
 
-    for col in data.columns:
-        st.write(f"- {col} ({data[col].dtype}, unique={data[col].nunique()})")
+    # small sample (fast + efficient)
+    sample = data.sample(min(50, len(data)))
+    data_text = sample.to_string()
 
-    # ------------------ GROQ LLM ------------------
-    #GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-    GROQ_API_KEY ="REMOVED_KEY"
-    llm = OpenAI(
-        api_token=GROQ_API_KEY,
-        base_url="https://api.groq.com/openai/v1",  # ✅ GROQ endpoint
-        model="llama3-70b-8192"  # 🔥 best free model
-    )
-
-    # use small sample for speed
-    df_ai = SmartDataframe(
-        data.sample(min(50, len(data))),
-        config={"llm": llm, "verbose": False}
-    )
-
-    # ------------------ TEMPLATE ------------------
+    # -------- TEMPLATE --------
     TEMPLATE = """
 You are a data analyst.
 
-Tasks:
-1. Show important plots
-2. Show relationships between features
-3. Show strength (correlation or impact)
-4. Identify important columns
-
 Rules:
-- ALWAYS show plots first
-- Keep output SHORT
-- Max 5 bullet points
+- Answer ONLY using given dataset
+- Keep answers SHORT (3-5 points)
+- Focus on patterns, relationships, insights
+- No theory or outside knowledge
 
-Format:
-
-Columns:
-- important columns
-
-Plots:
-- generate plots
-
-Insights:
-- Feature A ↔ Feature B → Strong (0.85)
-
-Importance:
-- Most important feature:
-- Strongest relationship:
-- Least useful feature:
-
-No long explanations.
+If unrelated → say:
+"Only dataset-related questions allowed"
 """
 
-    # =========================
-    # SMART ANALYSIS
-    # =========================
-    if st.button("🧠 Smart Analysis"):
+    # ================= INPUT =================
+    q = st.text_input("Ask about your dataset")
+
+    # ================= RESPONSE =================
+    if q:
 
         with st.spinner("Analyzing..."):
-            response = df_ai.chat(
-                TEMPLATE + "\nAnalyze dataset with best plots."
+
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[  # type: ignore
+                    {"role": "system", "content": TEMPLATE},
+                    {"role": "user", "content": f"{data_text}\n\nQuestion: {q}"}
+                ]
             )
 
         st.success("✅ Done")
-        st.write(response)
-
-    # =========================
-    # CHAT
-    # =========================
-    st.subheader("💬 Ask your data")
-
-    q = st.text_input("Ask (plot, correlation, feature importance)")
-
-    if q:
-        with st.spinner("Thinking..."):
-            response = df_ai.chat(TEMPLATE + "\nQuestion: " + q)
-
-        st.write(response)
-
-    # =========================
-    # QUICK ACTIONS
-    # =========================
-    st.subheader("⚡ Quick Actions")
-
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        if st.button("📈 Correlation"):
-            st.write(df_ai.chat("Plot correlation heatmap and show strongest relations"))
-
-    with c2:
-        if st.button("🔗 Relationships"):
-            st.write(df_ai.chat("Plot top relationships between features"))
-
-    with c3:
-        if st.button("🔥 Important Features"):
-            st.write(df_ai.chat("Find most important features and their impact"))
+        st.write(response.choices[0].message.content)
