@@ -10,7 +10,13 @@ def show_ai_assistant(data):
     st.subheader("🤖 AI Data Assistant")
 
     # -------- GROQ --------
-    client = Groq(api_key=os.getenv("GROQ_API_KEY")) or st.secrets.get("GROQ_API_KEY")
+    api_key = os.getenv("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY")
+
+    if not api_key:
+        st.error("❌ GROQ_API_KEY not found")
+        st.stop()
+
+    client = Groq(api_key=api_key)
 
     # small sample (fast + efficient)
     sample = data.sample(min(50, len(data)))
