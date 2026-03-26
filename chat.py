@@ -11,10 +11,10 @@ def show_ai_assistant(data):
 
     # -------- GROQ --------
     api_key = os.getenv("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY")
-    st.write("Available secrets:", list(st.secrets.keys()))
+   # st.write("Available secrets:", list(st.secrets.keys()))
 
     if not api_key:
-        st.error("❌ GROQ_API_KEY not found")
+        st.error("GROQ_API_KEY not found")
         st.stop()
 
     client = Groq(api_key=api_key)

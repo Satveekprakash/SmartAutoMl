@@ -26,13 +26,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ------------------ TITLE ------------------
-st.title("🤖 Smart AutoML System")
+st.title("Smart AutoML System")
 st.caption("Train Machine Learning models automatically with zero coding 🚀")
 
 # ------------------ SIDEBAR ------------------
 st.sidebar.header("⚙️ Configuration")
 file = st.sidebar.file_uploader("📂 Upload CSV", type=["csv"])
-target = st.sidebar.text_input("🎯 Target Column (write or it auto detect)")
+target = st.sidebar.text_input("🎯 Target Column (write or NONE)")
 
 model_type = st.sidebar.selectbox(
     "🧠 Select Model Type",
