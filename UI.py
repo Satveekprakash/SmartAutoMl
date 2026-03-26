@@ -83,7 +83,7 @@ if "data" in st.session_state:
             model = None
 
             # -------- ML UNSUPERVISED --------
-            if target == "NONE":
+            if target == "NONE" or target=="":
                 st.success("🔍 Running ML Unsupervised")
 
                 from unsupervised import run_unsupervised
