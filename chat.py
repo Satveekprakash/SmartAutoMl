@@ -59,4 +59,4 @@ If unrelated → say:
 
  except Exception as e:
 
-     st.error(f"AI Assistant Error:@Try next time{e}")
+     st.error(f"AI Assistant Error:@Try next time")
