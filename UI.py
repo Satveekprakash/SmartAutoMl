@@ -27,7 +27,7 @@ st.markdown("""
 
 # ------------------ TITLE ------------------
 st.title("🤖 Smart AutoML System")
-st.caption("Train ML/DL models automatically with zero coding 🚀")
+st.caption("Train Machine Learning models automatically with zero coding 🚀")
 
 # ------------------ SIDEBAR ------------------
 st.sidebar.header("⚙️ Configuration")
