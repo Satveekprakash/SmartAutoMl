@@ -36,7 +36,7 @@ target = st.sidebar.text_input("🎯 Target Column (write or it auto detect)")
 
 model_type = st.sidebar.selectbox(
     "🧠 Select Model Type",
-    ["MachineLearning", "DeepLearning"]
+    ["MachineLearning"]
 )
 
 run_btn = st.sidebar.button("🚀 Run Model", key="run_btn")
@@ -62,71 +62,40 @@ if "data" in st.session_state:
     if "data" in st.session_state:
         show_ai_assistant(st.session_state["data"])
     # target predtiction or auto
-    from llm_utils import detect_target
-
-    if target.strip() == "":
-        target = detect_target(data)
-        st.success("Target is auto detect")
-        st.success(target)
-
-         # 🔥 important check
-        if target not in data.columns:
-            target = "NONE"
-
-    else:
-        if target not in data.columns:
-             target = "NONE"
+    # target = target.strip()
+    #
+    # if target == "":
+    #     try:
+    #         from llm_utils import detect_target
+    #
+    #         target = detect_target(data)
+    #         st.success(f"🎯 Auto detected target: {target}")
+    #     except Exception as e:
+    #         st.warning("⚠️ Auto target detection unavailable. Type the target.")
+    #         target =target
     # ------------------ RUN MODEL ------------------
     if run_btn:
+        st.session_state["run_clicked"] = True
+
+    if st.session_state.get("run_clicked"):
 
         with st.spinner("⏳ Training model... Please wait"):
             model = None
 
-            # -------- DL UNSUPERVISED --------
-            if target == "NONE" and model_type == "DeepLearning":
-                st.success("🔍 Running Deep Learning Unsupervised")
-
-                from dl_unsupervised import run_unsupervised
-                result = run_unsupervised(data)
-
-                from ui.dl_ui_u import show_unsupervised_result
-                show_unsupervised_result(result)
-
-            # -------- DL SUPERVISED --------
-            elif model_type == "DeepLearning":
-                st.success("🧠 Running Deep Learning Supervised")
-
-                from src.data_detector import detect_problem_type
-                t = detect_problem_type(data, target)
-
-                if t == "Regression":
-                    from dl_regression import run_regression_dl
-                    model = run_regression_dl(data, target)
-
-                    from ui.dl_ui_r import show_regression_result
-                    show_regression_result(model)
-
-                else:
-                    from dl_classification import run_classification_dl
-                    model, config, acc = run_classification_dl(data, target)
-
-                    from ui.dl_ui_c import show_classification_result
-                    show_classification_result(model, config, acc)
-
             # -------- ML UNSUPERVISED --------
-            elif target == "NONE":
+            if target == "NONE":
                 st.success("🔍 Running ML Unsupervised")
 
                 from unsupervised import run_unsupervised
 
-                best_model_name, best_model, results,pipeline,cluster_summary= run_unsupervised(data)
+                best_model_name, best_model, results, pipeline, cluster_summary = run_unsupervised(data)
 
-                model=pipeline
+                model = pipeline
                 st.session_state["encoder"] = None
 
                 from ui.ml_ui_u import show_clustering_results
-                show_clustering_results(best_model_name, results,cluster_summary)
 
+                show_clustering_results(best_model_name, results, cluster_summary)
             # -------- ML SUPERVISED --------
             else:
                 st.success("⚡ Running Machine Learning Supervised")

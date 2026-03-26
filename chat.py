@@ -5,7 +5,7 @@ from groq import Groq
 from dotenv import load_dotenv
 load_dotenv()
 def show_ai_assistant(data):
-
+ try:
     st.divider()
     st.subheader("🤖 AI Data Assistant")
 
@@ -39,7 +39,7 @@ If unrelated → say:
         with st.spinner("Analyzing..."):
 
             response = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model="llama-3.3-70b-versatile", #llama-3.1-8b-instant,#llama-3.3-70b-versatile
                 messages=[  # type: ignore
                     {"role": "system", "content": TEMPLATE},
                     {"role": "user", "content": f"{data_text}\n\nQuestion: {q}"}
@@ -48,3 +48,8 @@ If unrelated → say:
 
         st.success("✅ Done")
         st.write(response.choices[0].message.content)
+
+
+ except Exception as e:
+
+     st.error(f"AI Assistant Error:@Try next time{e}")
